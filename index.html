@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MDC Authority Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Icons (sediakan sendiri di root) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="theme-color" content="#0f5ca8" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-left">
+        <h1 class="app-title">MDC Authority Status & Cost Dashboard</h1>
+        <p class="app-subtitle">
+          Menyatukan semua kerja authority MDC dalam satu platform – status, kos & compliance dalam satu tempat.
+        </p>
+      </div>
+      <div class="app-header-right">
+        <span class="app-badge">Internal Use · Single Source of Truth</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="app-nav">
+      <button class="nav-btn active" data-view="entry">Data Entry</button>
+      <button class="nav-btn" data-view="summary">Summary Report</button>
+    </nav>
+
+    <main class="app-main">
+      <!-- VIEW 1: DATA ENTRY -->
+      <section id="view-entry" class="view active">
+        <div class="card">
+          <h2>Data Entry – Status & Cost</h2>
+          <p class="section-note">
+            Satu tempat key-in data sahaja (single source of truth). Gunakan borang ini untuk key-in status permohonan,
+            kos (fee, compound, deposit) dan maklumat compliance.
+          </p>
+
+          <form id="entry-form" class="form-grid">
+            <!-- Hidden for edit vs new -->
+            <input type="hidden" id="record-id" />
+
+            <!-- PLANT & MAJLIS & AUTHORITY -->
+            <div class="form-field">
+              <label for="plant-name">Plant</label>
+              <select id="plant-name" required></select>
+            </div>
+
+            <div class="form-field">
+              <label for="majlis">Majlis / PBT</label>
+              <select id="majlis">
+                <!-- Diisi melalui JS -->
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="authority-body">Authority / Agency (LUAS / DOE / JKKP / dll.)</label>
+              <select id="authority-body">
+                <!-- Diisi melalui JS -->
+              </select>
+            </div>
+
+            <!-- PERMIT / APPLICATION -->
+            <div class="form-field">
+              <label for="permit-type">Jenis Permit / Licence</label>
+              <select id="permit-type" required></select>
+            </div>
+
+            <div class="form-field">
+              <label for="application-type">Jenis Permohonan</label>
+              <select id="application-type" required>
+                <option value="">-- Pilih --</option>
+                <option value="New">New</option>
+                <option value="Renewal">Renewal</option>
+                <option value="Variation / Amendment">Variation / Amendment</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="status">Status Permohonan</label>
+              <select id="status" required></select>
+            </div>
+
+            <div class="form-field">
+              <label for="ref-no">No. Rujukan / Permit</label>
+              <input type="text" id="ref-no" placeholder="Contoh: KM2025/001, Lesen No. xxx" />
+            </div>
+
+            <!-- DATES -->
+            <div class="form-field">
+              <label for="submission-date">Tarikh Submission</label>
+              <input type="date" id="submission-date" />
+            </div>
+
+            <div class="form-field">
+              <label for="approval-date">Tarikh Approval</label>
+              <input type="date" id="approval-date" />
+            </div>
+
+            <div class="form-field">
+              <label for="expiry-date">Tarikh Luput (Expiry Date)</label>
+              <input type="date" id="expiry-date" />
+            </div>
+
+            <!-- INVOICE & COST -->
+            <div class="form-field">
+              <label for="invoice-no">Invoice No.</label>
+              <input type="text" id="invoice-no" placeholder="Contoh: INV/MPKS/2025/0012" />
+            </div>
+
+            <div class="form-field">
+              <label for="invoice-date">Invoice Date</label>
+              <input type="date" id="invoice-date" />
+            </div>
+
+            <div class="form-field">
+              <label for="fee-amount">Fee Amount (RM)</label>
+              <input type="number" step="0.01" min="0" id="fee-amount" placeholder="Contoh: 5000.00" />
+            </div>
+
+            <div class="form-field">
+              <label for="compound-amount">Compound (RM)</label>
+              <input type="number" step="0.01" min="0" id="compound-amount" placeholder="Contoh: 25000.00" />
+            </div>
+
+            <div class="form-field">
+              <label for="deposit-amount">Deposit (RM)</label>
+              <input type="number" step="0.01" min="0" id="deposit-amount" placeholder="Contoh: 30000.00" />
+            </div>
+
+            <div class="form-field">
+              <label for="total-cost">Total Cost (RM)</label>
+              <input type="text" id="total-cost" readonly />
+            </div>
+
+            <div class="form-field">
+              <label for="payment-status">Payment Status</label>
+              <select id="payment-status">
+                <!-- Diisi melalui JS -->
+              </select>
+            </div>
+
+            <!-- CHANGE NOTES & ATTACHMENTS -->
+            <div class="form-field form-field-full">
+              <label for="change-notes">Change Notes / Catatan Perubahan</label>
+              <textarea
+                id="change-notes"
+                rows="2"
+                placeholder="Contoh: KM revised, tukar layout silo; submission kedua pada 10/12/2025."
+              ></textarea>
+            </div>
+
+            <div class="form-field form-field-full">
+              <label for="attachments">
+                Attachments (link ke lesen, invoice, surat rayuan, dsb.)
+              </label>
+              <textarea
+                id="attachments"
+                rows="2"
+                placeholder="Contoh: https://drive.google.com/... &#10;Letak satu link setiap baris."
+              ></textarea>
+            </div>
+
+            <div class="form-field form-field-full">
+              <label for="remarks">Remarks Umum</label>
+              <textarea
+                id="remarks"
+                rows="2"
+                placeholder="Contoh: Menunggu keputusan rayuan diskaun 50% dari MPKS."
+              ></textarea>
+            </div>
+
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="save-btn">Save Record</button>
+              <button type="button" class="btn ghost" id="reset-form-btn">Reset Form</button>
+            </div>
+          </form>
+
+          <!-- Existing Records (untuk update status dengan mudah) -->
+          <h3 class="subheading">Senarai Rekod (untuk Edit / Update Status)</h3>
+          <p class="section-note">
+            Gunakan filter di bawah untuk cari rekod. Klik <strong>Edit</strong> untuk buka di borang di atas.
+          </p>
+
+          <div class="filters-row">
+            <div class="form-field">
+              <label for="filter-plant-records">Plant</label>
+              <select id="filter-plant-records">
+                <option value="">Semua Plant</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="filter-permit-records">Permit</label>
+              <select id="filter-permit-records">
+                <option value="">Semua Permit</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="filter-search-records">Search</label>
+              <input
+                type="text"
+                id="filter-search-records"
+                placeholder="Cari no rujukan, remarks..."
+              />
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="records-table">
+              <thead>
+                <tr>
+                  <th>Plant</th>
+                  <th>Majlis</th>
+                  <th>Permit</th>
+                  <th>Authority</th>
+                  <th>Status</th>
+                  <th>Ref No.</th>
+                  <th>Submission</th>
+                  <th>Invoice</th>
+                  <th>Total Cost (RM)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- JS render -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: SUMMARY REPORT -->
+      <section id="view-summary" class="view">
+        <div class="card">
+          <h2>Summary Report – Permit & Licence</h2>
+
+          <div class="summary-header">
+            <div>
+              <div class="summary-title-main">MACRO DIMENSION CONCRETE SDN. BHD.</div>
+              <div class="summary-title-sub" id="summary-year-title">
+                PERMIT AND LICENCE FOR THE YEAR OF [Year]
+              </div>
+              <div class="summary-title-meta" id="summary-status-date">
+                Status as at: [Tarikh]
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-row">
+            <div class="form-field">
+              <label for="filter-year-summary">Year (Invoice / Submission / Approval)</label>
+              <select id="filter-year-summary">
+                <option value="">All Years</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="filter-plant-summary">Plant</label>
+              <select id="filter-plant-summary">
+                <option value="">Semua Plant</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="filter-permit-summary">Permit</label>
+              <select id="filter-permit-summary">
+                <option value="">Semua Permit</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="filter-status-summary">Status</label>
+              <select id="filter-status-summary">
+                <option value="">All Status</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button class="btn primary" id="export-summary-csv-btn">
+              Download CSV (Open in Excel)
+            </button>
+          </div>
+
+          <!-- Summary Matrix (Fixed) -->
+          <div class="table-wrapper table-wrapper-scroll">
+            <table class="data-table matrix-table" id="summary-matrix-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Plant</th>
+                  <th>Majlis</th>
+                  <!-- Permit columns injected via JS -->
+                </tr>
+              </thead>
+              <tbody>
+                <!-- JS render -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cost Summary -->
+          <h3 class="subheading">Cost Summary by Plant (Paid / Partial / Unpaid)</h3>
+          <p class="section-note">
+            Split Total Cost ikut Paid / Partial / Unpaid per plant, berdasarkan filter di atas.
+          </p>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="cost-summary-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Plant</th>
+                  <th>Total Applications</th>
+                  <th>Total Cost (RM)</th>
+                  <th>Paid (RM)</th>
+                  <th>Partial (RM)</th>
+                  <th>Unpaid (RM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- JS render -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>MDC Authority Platform · Compliance, Cost & Status – Single Source of Truth</small>
+    </footer>
+  </div>
+
+  <!-- App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
